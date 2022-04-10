@@ -156,7 +156,7 @@ void dblBuffer(HWND hWnd, HDC hdc, LPRECT rcClientRect, Image *image) {
         for(int c = 0; c < w; c++)
         {
             Rgb col = pixels[(r*w)+c];
-            COLORREF color = RGB((int)(col.r*255), (int)(col.g*255),(int)(col.b*255));
+            COLORREF color = RGB((int)(col.r), (int)(col.g),(int)(col.b));
             // COLORREF color = RGB(255,0,0);
             //cout << col.r*255 <<endl;
             SetPixel(memDC,c,r,color);

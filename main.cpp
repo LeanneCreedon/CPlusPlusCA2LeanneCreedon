@@ -50,9 +50,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     AppendMenuW(Alter, MF_STRING, IDM_EDIT_FilterGreen, L"&Show Only Green"); // Copy this line to add
     AppendMenuW(Alter, MF_STRING, IDM_EDIT_FilterBlue, L"&Show Only Blue"); // Copy this line to add
     AppendMenuW(Alter, MF_SEPARATOR, 0, NULL);
-    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD1, L"&Additional Function 1"); // Copy this line to add
-    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD2, L"&Additional Function 2"); // Copy this line to add
-    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD3, L"&Additional Function 3"); // Copy this line to add
+    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD1, L"&Additional Function 1 - Negative"); // Copy this line to add
+    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD2, L"&Additional Function 2 - Blur"); // Copy this line to add
+    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD3, L"&Additional Function 3 - Shrink"); // Copy this line to add
      // Copy this line to add
 
 
@@ -101,7 +101,6 @@ void processMenu(HWND hWnd, WPARAM wParam)
             image->greyScale(); //comment
              break;
         case IDM_EDIT_FlipHorizontal:
-            //image.load(current_file);
             image->flipHorizontal();
             break;
         case IDM_EDIT_FlipVertical:
@@ -130,6 +129,7 @@ void processMenu(HWND hWnd, WPARAM wParam)
         case IDM_EDIT_AD3:
 
             image->AdditionalFunction3();
+
             break;
         case IDM_EDIT_Reset:
             if(fileType=="ppm")
