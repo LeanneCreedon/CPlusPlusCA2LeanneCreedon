@@ -52,7 +52,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     AppendMenuW(Alter, MF_SEPARATOR, 0, NULL);
     AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD1, L"&Additional Function 1 - Negative"); // Copy this line to add
     AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD2, L"&Additional Function 2 - Blur"); // Copy this line to add
-    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD3, L"&Additional Function 3 - Shrink"); // Copy this line to add
+    AppendMenuW(Alter, MF_STRING, IDM_EDIT_AD3, L"&Additional Function 3 - Desaturate"); // Copy this line to add
      // Copy this line to add
 
 
@@ -129,7 +129,6 @@ void processMenu(HWND hWnd, WPARAM wParam)
         case IDM_EDIT_AD3:
 
             image->AdditionalFunction3();
-
             break;
         case IDM_EDIT_Reset:
             if(fileType=="ppm")

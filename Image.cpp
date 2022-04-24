@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <cstring>
 #include <vector>
+#include <valarray>
 #include "Image.h"
 
 
@@ -74,75 +75,67 @@ void Image::flipVertically()
     }
 }
 
-void resize(Rgb* image, int width, int height, float scale)
-{
-    // Problem with original size image still appearing in background.
-    Rgb temp;
-    for(int y = 0; y < height*scale; y++)
-    {
-        int scaleY = (int)(y/scale);
-        for(int x = 0; x < width*scale; x++)
-        {
-            int scaleX = (int)(x/scale);
-            temp = image[x+y*width];
-            image[x+y*width] = image[scaleX+scaleY*width];
-            image[scaleX+scaleY*width] = temp;
-        }
-    }
-}
-
 void Image::AdditionalFunction3()
 {
-    resize(pixels, w, h, 0.8);
+    //Shrink image - Couldn't solve problem with the extra pixels still displaying after resize.
+//    Rgb temp;
+//    float scale = 0.8;
+//    for(int y = 0; y < h*scale; y++)
+//    {
+//        int scaleY = (int)(y/scale);
+//        for(int x = 0; x < w*scale; x++) {
+//            int scaleX = (int) (x / scale);
+//            temp = pixels[x + y * w];
+//            pixels[x + y * w] = pixels[scaleX + scaleY * w];
+//            pixels[scaleX + scaleY * w] = temp;
+//        }
+//    }
+
+    //Desaturation function
+    //Help from this page => https://stackoverflow.com/questions/13328029/how-to-desaturate-a-color
+    double percentage, greyscale;
+    for(int i=0; i<w*h; i++)
+    {
+        percentage = 0.5;
+        greyscale = 0.3*pixels[i].r + 0.6*pixels[i].g + 0.1*pixels[i].b;
+        pixels[i].r = pixels[i].r + percentage * (greyscale - pixels[i].r);
+        pixels[i].g = pixels[i].g + percentage * (greyscale - pixels[i].g);
+        pixels[i].b =  pixels[i].b + percentage * (greyscale - pixels[i].b);
+    }
 }
 
 void blur(float k, int width, int height, unsigned char *image)
 {
     //blur
+    //Help from this video => https://www.youtube.com/watch?v=tvVMLIIG9i0
     float b[3] = { 0 };
-    //Rgb temp;
-    for(int row=0; row<height; row++)
-    {
-        for(int col=0; col < width; col++)
-        {
-            for(int i=0; i < 3; i++)
-            {
+    for(int row=0; row<height; row++){
+        for(int col=0; col < width; col++){
+            for(int i=0; i < 3; i++){
                 b[i] = b[i] + k * (image[3 * (col + row * width) + i] - b[i]);
                 image[3 * (col + row * width) + i] = b[i];
             }
         }
     }
-
-    for(int row=0; row<height; row++)
-    {
-        for(int col=width-1; col >= 0; col--)
-        {
-            for(int i=0; i < 3; i++)
-            {
+    for(int row=0; row<height; row++){
+        for(int col=width-1; col >= 0; col--){
+            for(int i=0; i < 3; i++){
                 b[i] = b[i] + k * (image[3 * (col + row * width) + i] - b[i]);
                 image[3 * (col + row * width) + i] = b[i];
             }
         }
     }
-
-    for(int col=0; col < width; col++)
-    {
-        for(int row=0; row<height; row++)
-        {
-            for(int i=0; i < 3; i++)
-            {
+    for(int col=0; col < width; col++){
+        for(int row=0; row<height; row++){
+            for(int i=0; i < 3; i++){
                 b[i] = b[i] + k * (image[3 * (col + row * width) + i] - b[i]);
                 image[3 * (col + row * width) + i] = b[i];
             }
         }
     }
-
-    for(int col=width-1; col >= 0; col--)
-    {
-        for(int row=0; row<height; row++)
-        {
-            for(int i=0; i < 3; i++)
-            {
+    for(int col=width-1; col >= 0; col--){
+        for(int row=0; row<height; row++){
+            for(int i=0; i < 3; i++){
                 b[i] = b[i] + k * (image[3 * (col + row * width) + i] - b[i]);
                 image[3 * (col + row * width) + i] = b[i];
             }
@@ -153,12 +146,12 @@ void blur(float k, int width, int height, unsigned char *image)
 void Image::AdditionalFunction2()
 {
     blur(0.1, w, h, reinterpret_cast<unsigned char *>(pixels));
-    //Works but don't like code. I'll try fix it for next upload.
 }
 
 void Image::AdditionalFunction1()
 {
     //Negative
+    //Help from this site => https://dyclassroom.com/image-processing-project/how-to-convert-a-color-image-into-negative
     for(int i=0; i<w*h; i++)
     {
         pixels[i].r = 255 - pixels[i].r;
