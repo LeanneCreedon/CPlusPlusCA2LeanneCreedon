@@ -2,8 +2,6 @@
 // Created by floodd on 23/03/2022.
 //
 #include <iostream>
-#include <fstream>
-#include <iomanip>
 #include <cstring>
 #include <vector>
 #include <valarray>
@@ -12,7 +10,56 @@
 
 bool Image::loadRaw(string filename)
 {
-    return false;
+    std::ifstream ifs;
+    ifs.open(filename, std::ios::binary|std::ios::in); // need to spec. binary & input mode for Windows users
+    try {
+        if (ifs.fail()) { throw("Can't open input file"); }
+        std::string header;
+        int w, h, b;
+        ifs >> header;
+        if (strcmp(header.c_str(), "P6") != 0) throw("Can't read input file");
+        ifs >> w >> h >> b;
+        this->w = w;
+        this->h = h;
+        this->pixels = new Rgb[w * h];  // this will throw an exception if bad_alloc
+        ifs.ignore(256, '\n'); // skip empty lines if necessary until we get to the binary data
+
+        unsigned char pixel_buffer[3]; // buffer to store one pixel, with three channels red,green and blue
+
+        //My attempt at the Gamma encoding/RAW image load.
+        int newR, newG, newB;
+        ifs >> w >> h;
+        for(int i = 0; i<(w * h); i++)
+        {
+            ifs >> pixels[i].r >> pixels[i].g >> pixels[i].b;
+            this->pixels[i].r = pixels[i].r*255;
+            this->pixels[i].g = pixels[i].g*255;
+            this->pixels[i].b = pixels[i].b*255;
+        }
+        for(int i = 0; i<(w * h); i++)
+        {
+            newR = (pixels[i].r/255)^(int)(1/2.2);
+            newG = (pixels[i].g/255)^(int)(1/2.2);
+            newB = (pixels[i].b/255)^(int)(1/2.2);
+            this->pixels[i].r = newR;
+            this->pixels[i].g = newG;
+            this->pixels[i].b = newB;
+        }
+        for(int i = 0; i<(w * h); i++)
+        {
+            ifs.read(reinterpret_cast<char *>(pixel_buffer), 3);
+            this->pixels[i].r = pixel_buffer[0];
+            this->pixels[i].g = pixel_buffer[1];
+            this->pixels[i].b = pixel_buffer[2];
+        }
+
+        ifs.close();
+    }
+    catch (const char *err) {
+        fprintf(stderr, "%s\n", err);
+        ifs.close();
+    }
+    return true;
 }
 
 void Image::filterRed()
@@ -77,6 +124,19 @@ void Image::flipVertically()
 
 void Image::AdditionalFunction3()
 {
+    //Desaturation function
+    //Help from this page => https://stackoverflow.com/questions/13328029/how-to-desaturate-a-color
+    double percentage, greyscale;
+    for(int i=0; i<w*h; i++)
+    {
+        percentage = 0.5;
+        greyscale = 0.3*pixels[i].r + 0.6*pixels[i].g + 0.1*pixels[i].b;
+        pixels[i].r = pixels[i].r + percentage * (greyscale - pixels[i].r);
+        pixels[i].g = pixels[i].g + percentage * (greyscale - pixels[i].g);
+        pixels[i].b =  pixels[i].b + percentage * (greyscale - pixels[i].b);
+    }
+
+    //Originally tried this function:
     //Shrink image - Couldn't solve problem with the extra pixels still displaying after resize.
 //    Rgb temp;
 //    float scale = 0.8;
@@ -90,24 +150,17 @@ void Image::AdditionalFunction3()
 //            pixels[scaleX + scaleY * w] = temp;
 //        }
 //    }
-
-    //Desaturation function
-    //Help from this page => https://stackoverflow.com/questions/13328029/how-to-desaturate-a-color
-    double percentage, greyscale;
-    for(int i=0; i<w*h; i++)
-    {
-        percentage = 0.5;
-        greyscale = 0.3*pixels[i].r + 0.6*pixels[i].g + 0.1*pixels[i].b;
-        pixels[i].r = pixels[i].r + percentage * (greyscale - pixels[i].r);
-        pixels[i].g = pixels[i].g + percentage * (greyscale - pixels[i].g);
-        pixels[i].b =  pixels[i].b + percentage * (greyscale - pixels[i].b);
-    }
 }
 
 void blur(float k, int width, int height, unsigned char *image)
 {
     //blur
     //Help from this video => https://www.youtube.com/watch?v=tvVMLIIG9i0
+
+    //To make symmetrical, had to have two for loops for each direction
+    //to blur the image both ways
+
+    //Horizontal blur
     float b[3] = { 0 };
     for(int row=0; row<height; row++){
         for(int col=0; col < width; col++){
@@ -125,6 +178,7 @@ void blur(float k, int width, int height, unsigned char *image)
             }
         }
     }
+    //Vertical blur
     for(int col=0; col < width; col++){
         for(int row=0; row<height; row++){
             for(int i=0; i < 3; i++){
@@ -145,6 +199,7 @@ void blur(float k, int width, int height, unsigned char *image)
 
 void Image::AdditionalFunction2()
 {
+    //Calling blur method
     blur(0.1, w, h, reinterpret_cast<unsigned char *>(pixels));
 }
 
@@ -157,6 +212,26 @@ void Image::AdditionalFunction1()
         pixels[i].r = 255 - pixels[i].r;
         pixels[i].g = 255 - pixels[i].g;
         pixels[i].b = 255 - pixels[i].b;
+    }
+}
+
+void Image::AdvancedFeature()
+{
+    //Sepia filter
+    //Help from this website =>
+    //https://www.codeproject.com/Questions/5247617/How-do-I-convert-image-to-grayscale-then-sepia-in
+
+    for(int i=0; i<w*h; i++) {
+        if (pixels[i].r < 63) {
+            pixels[i].r = (int) (pixels[i].r * 1.1);
+            pixels[i].b = (int) (pixels[i].b * 0.9);
+        } else if (pixels[i].r < 192) {
+            pixels[i].r = (int) (pixels[i].r * 1.15);
+            pixels[i].b = (int) (pixels[i].b * 0.85);
+        } else {
+            pixels[i].r = min(int(pixels[i].r * 1.08), 255);
+            pixels[i].b = (int) (pixels[i].b * 0.93);
+        }
     }
 }
 

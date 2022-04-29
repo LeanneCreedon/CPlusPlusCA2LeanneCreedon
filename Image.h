@@ -50,6 +50,7 @@ public:
     void AdditionalFunction1();
     void AdditionalFunction2();
     void AdditionalFunction3();
+    void AdvancedFeature();
     void rotate90cw();
 
 
